@@ -60,7 +60,7 @@ def main():
     print(f"Dataset loaded with {num_classes} classes.")
 
     # --- Model, Criterion, Optimizer, Scheduler ---
-    model = densenet_cifar(k=args.growth_rate, num_classes=num_classes).to(device)
+    model = densenet_cifar(growth_rate=args.growth_rate, num_classes=num_classes).to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(
         model.parameters(),
