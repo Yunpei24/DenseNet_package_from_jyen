@@ -101,12 +101,13 @@ def main():
     # --- TRAINING LOOP ---
     for epoch in range(start_epoch, args.epochs):
         train_loss, train_acc = train_one_epoch(epoch, model, trainloader, optimizer, criterion, device)
-        test_loss, test_acc = evaluate_cifar(epoch, model, testloader, criterion, device)
+        test_loss, test_acc, error_rate = evaluate_cifar(epoch, model, testloader, criterion, device)
         scheduler.step()
 
         if use_wandb:
             wandb.log({"epoch": epoch, "train_loss": train_loss, "train_accuracy": train_acc,
-                       "test_loss": test_loss, "test_accuracy": test_acc,
+                       "test_loss": test_loss, "test_accuracy": test_acc, 
+                       "test_error_rate": error_rate,
                        "learning_rate": scheduler.get_last_lr()[0]})
 
             # --- SAVE CHECKPOINT ---
