@@ -1,0 +1,6 @@
+torch
+torchvision
+kaggle
+pandas
+tqdm
+wandb
