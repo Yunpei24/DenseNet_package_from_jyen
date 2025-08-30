@@ -62,40 +62,45 @@ def setup_wandb(args, project_name):
     """
     if args.no_wandb:
         print("W&B logging is disabled by the user.")
-        return False
+        return None, False
 
+    login_successful = False
     # Priority 1: Environment Variable (most common method for local/CI/CD)
     if os.environ.get("WANDB_API_KEY"):
-        print("Attempting to log in to W&B using environment variable...")
+        print("Attempting to log in to W&B using WANDB_API_KEY environment variable...")
         if wandb.login():
+            login_successful = True
             print("Successfully logged into W&B.")
-        else:
-            print("W&B login failed despite finding an API key. Disabling tracking.")
-            return False
-    else:
-        # Priority 2: Fallback to Kaggle Secrets
+    
+    # Priority 2: Fallback to Kaggle Secrets if environment variable method fails or is not available
+    if not login_successful:
         try:
             from kaggle_secrets import UserSecretsClient
-            print("W&B API key not found in environment. Trying Kaggle Secrets...")
+            print("W&B API key not found or failed in environment. Trying Kaggle Secrets...")
             user_secrets = UserSecretsClient()
             wandb_api_key = user_secrets.get_secret("WANDB_API_KEY")
             if wandb.login(key=wandb_api_key):
+                login_successful = True
                 print("Successfully logged into W&B using Kaggle Secrets.")
-            else:
-                 print("W&B login failed using Kaggle Secrets. Disabling tracking.")
-                 return False
-        except Exception:
-            print("Could not log in to W&B. Ensure WANDB_API_KEY is set or you are in a configured environment.")
-            return False
+        except ImportError:
+            # This is not an error if not on Kaggle, just a message.
+            print("Kaggle secrets library not found. Skipping.")
+        except Exception as e:
+            # This is an error if Kaggle secrets are expected but fail.
+            print(f"An error occurred while using Kaggle Secrets: {e}")
 
-
-    # Initialize the W&B Run with resume capabilities
+    if not login_successful:
+        print("Could not log in to W&B. Training will continue without tracking.")
+        print("To enable tracking, please set the WANDB_API_KEY environment variable.")
+        return None, False
+    
+    # Initialize the W&B Run
     run = wandb.init(
         project=project_name,
-        name=f"densenet_k{args.growth_rate}",
+        name=args.model_arch,
         config=vars(args),
-        id=args.resume_id,  # Pass the run_id to resume
-        resume="allow"      # Allow resuming the run
+        id=args.resume_id,
+        resume="allow"
     )
-    print(f"W&B run 'densenet_k{args.growth_rate}' initialized in project '{project_name}' | Run ID: {run.id}")
+    print(f"W&B run initialized. ID: {run.id}")
     return run, True
