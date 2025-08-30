@@ -72,7 +72,7 @@ def setup_wandb(args, project_name):
             login_successful = True
             print("Successfully logged into W&B.")
     
-    # Priority 2: Fallback to Kaggle Secrets if environment variable method fails or is not available
+    # Priority 2: Fallback to Kaggle Secrets
     if not login_successful:
         try:
             from kaggle_secrets import UserSecretsClient
@@ -83,21 +83,27 @@ def setup_wandb(args, project_name):
                 login_successful = True
                 print("Successfully logged into W&B using Kaggle Secrets.")
         except ImportError:
-            # This is not an error if not on Kaggle, just a message.
-            print("Kaggle secrets library not found. Skipping.")
+            # This is expected if not on Kaggle.
+            print("Kaggle secrets library not found. Skipping fallback.")
         except Exception as e:
             # This is an error if Kaggle secrets are expected but fail.
-            print(f"An error occurred while using Kaggle Secrets: {e}")
+            print(f"An error occurred while trying to use Kaggle Secrets: {e}")
+            print("Please ensure the secret 'WANDB_API_KEY' is correctly named and attached to this notebook.")
 
     if not login_successful:
-        print("Could not log in to W&B. Training will continue without tracking.")
-        print("To enable tracking, please set the WANDB_API_KEY environment variable.")
+        print("\nCould not log in to W&B. Training will continue without tracking.")
+        print("To enable tracking, please set the WANDB_API_KEY secret or environment variable.")
         return None, False
     
+    # Define a dynamic run name based on available arguments
+    run_name = f"densenet_k{args.growth_rate}"
+    if 'model_arch' in args:
+        run_name = args.model_arch
+        
     # Initialize the W&B Run
     run = wandb.init(
         project=project_name,
-        name=args.model_arch,
+        name=run_name,
         config=vars(args),
         id=args.resume_id,
         resume="allow"

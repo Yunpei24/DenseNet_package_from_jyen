@@ -39,6 +39,10 @@ def parse_args():
     parser.add_argument('--lr', type=float, default=0.1, help='Initial learning rate')
     parser.add_argument('--num-workers', type=int, default=4, help='Number of dataloader workers')
     parser.add_argument('--no-wandb', action='store_true', help='Disable Weights & Biases logging')
+
+    parser.add_argument('--output-dir', type=str, default='./outputs', help='Directory for sorted data and checkpoints')
+    parser.add_argument('--save-every', type=int, default=5, help='Save a checkpoint every N epochs')
+    parser.add_argument('--resume-id', type=str, default=None, help='W&B run ID to resume from a checkpoint')
     return parser.parse_args()
 
 def main():

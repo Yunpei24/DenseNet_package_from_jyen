@@ -41,6 +41,10 @@ def parse_args():
                         help='Weight decay for optimizer (default: 1e-4)')
     parser.add_argument('--no-wandb', action='store_true',
                         help='Disable Weights & Biases logging')
+    
+    parser.add_argument('--output-dir', type=str, default='./outputs', help='Directory for checkpoints')
+    parser.add_argument('--save-every', type=int, default=10, help='Save a checkpoint every N epochs')
+    parser.add_argument('--resume-id', type=str, default=None, help='W&B run ID to resume from a checkpoint')
     return parser.parse_args()
 
 def main():
