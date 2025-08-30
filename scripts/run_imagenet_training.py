@@ -42,7 +42,9 @@ def parse_args():
 
     parser.add_argument('--output-dir', type=str, default='./outputs', help='Directory for sorted data and checkpoints')
     parser.add_argument('--save-every', type=int, default=5, help='Save a checkpoint every N epochs')
+
     parser.add_argument('--resume-id', type=str, default=None, help='W&B run ID to resume from a checkpoint')
+    parser.add_argument('--wb-project-name', type=str, default='densenet-imagenet', help='W&B project name')
     return parser.parse_args()
 
 def main():
@@ -51,7 +53,11 @@ def main():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print(f"Training {args.model_arch} on ImageNet using device: {device}")
 
-    run, use_wandb = setup_wandb(args, project_name="densenet-imagenet")
+    if not args.no_wandb:
+        if args.wb_project_name is None:
+            args.wb_project_name = "densenet-imagenet"
+
+    run, use_wandb = setup_wandb(args, project_name=args.wb_project_name)
 
     # --- Data Preparation ---
     print("Preparing datasets (this may take a while for the first run)...")
