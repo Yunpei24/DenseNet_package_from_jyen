@@ -108,5 +108,5 @@ def setup_wandb(args, project_name):
         id=args.resume_id,
         resume="allow"
     )
-    print(f"W&B run initialized. ID: {run.id}")
+    print(f"W&B run initialized. ID: {run.id}. \nUse --resume-id {run.id} to resume this run in the future.")
     return run, True
